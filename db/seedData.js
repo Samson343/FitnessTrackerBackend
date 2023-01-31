@@ -3,13 +3,70 @@
 const client = require("./client")
 
 async function dropTables() {
-  console.log("Dropping All Tables...")
-  // drop all tables, in the correct order
+  try {
+    console.log("Dropping All Tables...")
+
+    // drop all tables, in the correct order
+    await client.query(`
+    DROP TABLE IF EXISTS routine_activities;
+    DROP TABLE IF EXISTS routines;
+    DROP TABLE IF EXISTS activities;
+    DROP TABLE IF EXISTS users;
+  `)
+
+    console.log("Finished dropping tables!")
+  }
+  catch (error) {
+    console.error("Error dropping tables!")
+    throw error
+  }
+
 }
 
 async function createTables() {
-  console.log("Starting to build tables...")
-  // create all tables, in the correct order
+  try {
+    console.log("Starting to build tables...")
+    // create all tables, in the correct order
+    await client.query(`
+
+    CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      username varchar(255) UNIQUE NOT NULL,
+      password varchar(255) NOT NULL
+    );
+
+    CREATE TABLE activities (
+      id SERIAL PRIMARY KEY,
+      name varchar(255) UNIQUE NOT NULL,
+      description varchar(255) NOT NULL
+    );
+
+    CREATE TABLE routines (
+      id SERIAL PRIMARY KEY,
+      "creatorId" INTEGER REFERENCES users(id),
+      "isPublic" BOOLEAN DEFAULT false,
+      name varchar(255) UNIQUE NOT NULL,
+      goal TEXT NOT NULL
+    );
+
+    CREATE TABLE routine_activities (
+      id SERIAL PRIMARY KEY,
+      "routineId" INTEGER REFERENCES routines(id),
+      "activityId" INTEGER REFERENCES activities(id),
+      duration INTEGER,
+      count INTEGER,
+      UNIQUE ("routineId", "activityId")
+    );
+  `)
+
+  //for routines we should consider the isPublic atribute as a way to "publish" a routine or keep it private
+  //for activities, we should aim to further prevent duplicate activities like "biking" and "Biking" in the create activities function
+
+  } catch (error) {
+    console.error("Error while building the tables!")
+    throw error
+  }
+
 }
 
 /* 
