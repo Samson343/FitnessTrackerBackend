@@ -6,6 +6,11 @@ const {
   createUser,
 } = require ('./users')
 
+const {
+  createActivity,
+  getAllActivities
+} = require ('./activities')
+
 async function dropTables() {
   try {
     console.log("Dropping All Tables...")
