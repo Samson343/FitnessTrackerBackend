@@ -1,4 +1,4 @@
-const { Client } = require("pg/lib");
+// const { Client } = require("pg/lib");
 const client = require("./client");
 const bcrypt = require('bcrypt');
 
@@ -7,49 +7,57 @@ const bcrypt = require('bcrypt');
 
 // user functions
 async function createUser({ username, password }) {
-const SALT_COUNT = 10;
-const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
-try{
-  const { rows: [user] } = await client.query(`
+  const SALT_COUNT = 10;
+  const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
+  try {
+    const { rows: [user] } = await client.query(`
   INSERT INTO users(username, password)
   VALUES($1, $2)
   ON CONFLICT (username) DO NOTHING
-  RETURNING id, username;
-  ` [username, hashedPassword]);
-  return user;
-}catch (error){
-  console.log("Error creating user")
-}
-  
+  RETURNING *;
+  `, [username, hashedPassword]);
+
+    delete user.password
+
+    return user;
+  } catch (error) {
+    console.log("Error creating user")
+  }
+
 }
 
 async function getUser({ username, password }) {
-// console.log(password)
-const user = await getUserByUserName(username);
-// consol.log(user)
-const hashedPassword = user.password;
-const isValid = await bcrypt.compare(password, hashedPassword)
-if(isValid){
-  delete user.password
-  return user
-}
+  // console.log(password)
+  const user = await getUserByUsername(username);
+  // consol.log(user)
+  const hashedPassword = user.password;
+  const isValid = await bcrypt.compare(password, hashedPassword)
+  if (isValid) {
+    delete user.password
+    return user
+  }
 
 }
 
 async function getUserById(userId) {
   const { rows: [user] } = await client.query(`
-  SELECT id, username FROM users WHERE id=${userId}
+  SELECT id, username 
+  FROM users 
+  WHERE id=${userId}
   `);
-  if(!user){
+  if (!user) {
     return null;
   }
+  return user
 
 }
 
 async function getUserByUsername(userName) {
   const { rows: [user] } = await client.query(`
-  SELECT * FROM users WHERE username=$1
-  ` [userName]);
+  SELECT * 
+  FROM users 
+  WHERE username=$1
+  `, [userName]);
   return user;
 
 }
