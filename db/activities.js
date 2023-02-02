@@ -7,11 +7,47 @@ async function createActivity({ name, description }) {
 
 async function getAllActivities() {
   // select and return an array of all activities
+  try {
+    const { rows: activities } = await client.query(`
+    SELECT *
+    FROM activities
+`);
+    return activities;
+  } catch (error) {
+    console.log("Error getting activities")
+    throw error;
+  }
 }
 
-async function getActivityById(id) {}
+async function getActivityById(id) {
+  try {
+    const { rows: [activity] } = await client.query(`
+    SELECT *
+    FROM activities
+    WHERE id=$1
+    `, [id]);
 
-async function getActivityByName(name) {}
+    return activity;
+  } catch (error) {
+    console.log("Error getting activity by Id")
+    throw error;
+  }
+}
+
+async function getActivityByName(name) {
+  try {
+    const { rows: [activity] } = await client.query(`
+    SELECT *
+    FROM activities
+    WHERE name=$1
+    `, [name]);
+
+    return activity;
+  } catch (error) {
+    console.log("Error getting activity by name")
+    throw error;
+  }
+}
 
 async function attachActivitiesToRoutines(routines) {
   // select and return an array of all activities

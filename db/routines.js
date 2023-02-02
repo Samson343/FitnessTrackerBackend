@@ -1,12 +1,53 @@
 const client = require("./client");
 
-async function createRoutine({ creatorId, isPublic, name, goal }) {}
+async function createRoutine({ creatorId, isPublic, name, goal }) {
+  try{
+    const { rows: [routine] } = await client.query(`
+    INSERT INTTO routine ("creatorId", "isPublic", "name", "goal")
+    VALUES($1, $2, $3, $4)
+    ON CONFLICT (name) DO NOTHING
+    RETURNING *;
+    `, [creatorId, isPublic, name, goal]);
+    return routine;
 
-async function getRoutineById(id) {}
+  }catch (error){
+    console.log(error);
+  }
+}
 
-async function getRoutinesWithoutActivities() {}
+async function getRoutineById(id) {
+  try{
+    const { rows: [routine] } = await client.query(`
+    SELECT * FROM routines WHERE routines.id=$1;
+    `, [id]);
+    return routine;
+  }catch (error){
+    console.log(error);
+  }
+}
 
-async function getAllRoutines() {}
+async function getRoutinesWithoutActivities() {
+  try{
+    const { rows: [routines] } = await client.query(`
+    SELECT * FROM routines;
+    `)
+    return routines;
+  }catch(error){
+    console.log(error);
+  }
+}
+
+async function getAllRoutines() {
+  try{
+    const { rows: routines } = await client.query(`
+    SELECT routines.*, users.username AS "creatorName" FROM routines
+    JOIN users ON routines."creatorId"=users.id
+    `)
+    return routines;
+  }catch (error){
+    console.log(error);
+  }
+}
 
 async function getAllPublicRoutines() {}
 
