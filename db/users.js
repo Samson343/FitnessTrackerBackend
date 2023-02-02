@@ -38,7 +38,7 @@ async function getUser({ username, password }) {
       return user
     } else {
       return
-    }
+    } 
 }
 
 async function getUserById(userId) {
