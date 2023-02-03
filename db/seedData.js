@@ -44,6 +44,7 @@ async function createTables() {
       password varchar(255) NOT NULL
     );
 
+    
     CREATE TABLE activities (
       id SERIAL PRIMARY KEY,
       name varchar(255) UNIQUE NOT NULL,

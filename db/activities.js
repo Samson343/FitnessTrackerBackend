@@ -69,16 +69,21 @@ async function getActivityByName(name) {
 
 async function attachActivitiesToRoutines(routines) {
   // select and return an array of all activities
-  const activites = await getAllActivities()
+  // const activites = await getAllActivities()
 
-  // routines.map(routine => {
-  //   if (routine.id)
+  const { rows: [routine] } = await client.query (`
+    SELECT *
+    FROM activities
+    JOIN routine_activities
+    ON routine_activities."activityId" = activities.id
+    WHERE routine_activities."routineId"=$1;
+  `, [routines.id])
 
-  //   await client.query (`
+  // console.log("this is routine", routine) 
 
-  //   `) 
-  // })
+  
 
+  return routine
 }
 
 async function updateActivity({ id, ...fields }) {

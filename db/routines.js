@@ -54,11 +54,20 @@ async function getAllRoutines() {
   try{
 
     const { rows: routines } = await client.query (`
-      SELECT *
-      FROM routines;
+      SELECT users.username AS "creatorName", routines.*
+      FROM routines
+      JOIN users ON users.id = routines."creatorId";
       `)
-    
-    
+
+      console.log("this is routines", routines)
+
+      
+
+      const withActivities = await Promise.all(routines.map(attachActivitiesToRoutines))
+
+      console.log("this is withActivities", withActivities) 
+
+   
     return routines
   } catch (error) {
     console.error(error)
