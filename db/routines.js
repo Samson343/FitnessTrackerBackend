@@ -42,8 +42,12 @@ async function getRoutineById(id) {
 
 async function getRoutinesWithoutActivities() {
   try{
+    const { rows: routines } = await client.query (`
+      SELECT *
+      FROM routines
+    `)
 
-
+    return routines
   } catch (error) {
     console.error(error)
     throw error
@@ -59,16 +63,9 @@ async function getAllRoutines() {
       JOIN users ON users.id = routines."creatorId";
       `)
 
-      console.log("this is routines", routines)
-
-      
-
       const withActivities = await Promise.all(routines.map(attachActivitiesToRoutines))
-
-      console.log("this is withActivities", withActivities) 
-
    
-    return routines
+    return withActivities
   } catch (error) {
     console.error(error)
     throw error
@@ -78,12 +75,15 @@ async function getAllRoutines() {
 async function getAllPublicRoutines() {
   try{
     const { rows: routines } = await client.query (`
-    SELECT *
+    SELECT users.username AS "creatorName", routines.*
     FROM routines
+    JOIN users ON users.id = routines."creatorId"
     WHERE "isPublic" = true;
     `)
+
+    const withActivities = await Promise.all(routines.map(attachActivitiesToRoutines))
   
-    return routines
+    return withActivities
   } catch (error) {
     console.error(error)
     throw error
@@ -96,12 +96,15 @@ async function getAllRoutinesByUser({ username }) {
     const user = await getUserByUsername(username)
 
     const { rows: routines } = await client.query (`
-    SELECT *
+    SELECT users.username AS "creatorName", routines.*
     FROM routines
+    JOIN users ON users.id = routines."creatorId"
     WHERE "creatorId" = $1;
     `, [user.id])
 
-    return routines
+    const withActivities = await Promise.all(routines.map(attachActivitiesToRoutines))
+
+    return withActivities
 
   } catch (error) {
     console.error(error)
@@ -125,7 +128,21 @@ async function getPublicRoutinesByUser({ username }) {
 
 async function getPublicRoutinesByActivity({ id }) {
   try{
+    const allRoutines = await getAllPublicRoutines()
+   
+    const withActivities = allRoutines.filter(routine => { return routine.activities.length })
 
+    const result = []
+
+    withActivities.map (routine => {
+      let filterByAct = routine.activities.filter(activity => activity.id === id)
+      
+      if (filterByAct.length) {
+        result.push(routine)
+      }
+    })
+
+    return result
   } catch (error) {
     console.error(error)
     throw error
@@ -135,6 +152,21 @@ async function getPublicRoutinesByActivity({ id }) {
 async function updateRoutine({ id, ...fields }) {
   try{
 
+    const setString = Object.keys(fields).map((key, index) => {
+      return `"${ key }"=$${ index + 1 }`
+    }).join(', ')
+
+    if (setString.length) {
+      const { rows: [routine] } = await client.query(`
+        UPDATE routines
+        SET ${ setString }
+        WHERE id = ${ id }
+        RETURNING *;
+      `, Object.values(fields))
+
+      return routine
+    }
+
   } catch (error) {
     console.error(error)
     throw error
@@ -143,6 +175,17 @@ async function updateRoutine({ id, ...fields }) {
 
 async function destroyRoutine(id) {
   try{
+    
+      await client.query (`
+      DELETE FROM routine_activities
+      WHERE "routineId" = $1
+    `, [id]) 
+
+    const { rows:[routine] } = await client.query (`
+      DELETE FROM routines
+      WHERE routines.id=$1;
+    `, [id])
+
 
   } catch (error) {
     console.error(error)

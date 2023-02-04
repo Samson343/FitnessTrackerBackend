@@ -67,21 +67,18 @@ async function getActivityByName(name) {
 
 }
 
-async function attachActivitiesToRoutines(routines) {
+async function attachActivitiesToRoutines(routine) {
   // select and return an array of all activities
-  // const activites = await getAllActivities()
 
-  const { rows: [routine] } = await client.query (`
-    SELECT *
+  const { rows: activities } = await client.query(`
+    SELECT "routineId", "activityId" AS id, routine_activities.id AS "routineActivityId", duration, count, name, description
     FROM activities
     JOIN routine_activities
     ON routine_activities."activityId" = activities.id
     WHERE routine_activities."routineId"=$1;
-  `, [routines.id])
+  `, [routine.id])
 
-  // console.log("this is routine", routine) 
-
-  
+  routine.activities = activities
 
   return routine
 }
