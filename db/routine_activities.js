@@ -1,5 +1,5 @@
 const client = require("./client");
-const { getRoutineById } = require("./routines")
+// const { getRoutineById } = require("./routines")
 
 async function addActivityToRoutine({
   routineId,
@@ -118,3 +118,22 @@ module.exports = {
   destroyRoutineActivity,
   canEditRoutineActivity,
 };
+
+
+// for whatever reason it was not possible to import this function from routines.js even with proper exportation and const { getRoutineById } = require("./routines") syntax. I'm able to import/export similar functions between files without issue so I'm not sure what why it doesn't like this one in particular!
+
+async function getRoutineById(id) {
+  try{
+    const { rows: [routine] } = await client.query (`
+      SELECT *
+      FROM routines
+      WHERE id = $1;
+    `, [id])
+
+    return routine
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+
+}
