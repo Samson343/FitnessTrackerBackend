@@ -4,14 +4,15 @@ const usersRouter = express.Router();
 const jwt = require('jsonwebtoken')
 const { JWT_SECRET } = process.env;
 const bcrypt = require('bcrypt');
-const SALT_COUNT = 10
+// const SALT_COUNT = 10
 
 const {
     createUser,
     getUser,
     getUserById,
     getUserByUsername,
-} = require('../db')
+} = require('../db');
+const { response } = require("express");
 
 // POST /api/users/register
 usersRouter.post('/register', async (req, res, next) => {
@@ -66,7 +67,7 @@ usersRouter.post('/login', async (req, res, next) => {
     try {
         const user = await getUserByUsername(username)
         let passwordsMatch = await bcrypt.compare(password, user.password)
-        
+
 
         if (user && passwordsMatch) {
             const token = jwt.sign({
@@ -91,32 +92,40 @@ usersRouter.post('/login', async (req, res, next) => {
 })
 
 // GET /api/users/me
-// usersRouter.get('/me', async (req, res, next) => {
-//     const prefix = 'Bearer ';
-//     const auth = req.header('Authorization');
-//     const token = auth.slice(prefix.length);
+usersRouter.get('/me', async (req, res, next) => {
 
-//     const {id } = jwt.verify(token, JWT_SECRET)
-    
+    try {
+        const prefix = 'Bearer ';
+        const auth = req.header('Authorization');
+        const token = auth.slice(prefix.length);
 
-//     // if (!jwt.verify(token, JWT_SECRET)) {
-//     //     next({
-//     //       message: "invalid token, please log in"
-//     //     })
-//     // }
+        // if (!jwt.verify(token, JWT_SECRET)) {
+        //     res.status(401)
+        //     next({
+        //       message: "invalid token, please log in"
+        //     })
+        // }
 
-//     try {
-//       const { id } = jwt.verify( token, JWT_SECRET )
+        const { id, username } = jwt.verify(token, JWT_SECRET)
 
-//       const user = await getUser( username, password )
-      
-//       res.send({
-//         user
-//       })
-//     } catch (error) {
-//     next(error)
-//     }
-// })
+        console.log("this is id", id, "this is username", username)
+
+        if (id && username) {
+            res.send({
+                id, username
+            })
+            next()
+        } else {
+            next({
+                name: 'AuthorizationHeaderError',
+                message: `Authorization token must start with ${ prefix }`
+            });
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
 
 // GET /api/users/:username/routines
 
