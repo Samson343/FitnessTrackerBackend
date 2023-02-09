@@ -12,7 +12,7 @@ const {
     getUserById,
     getUserByUsername,
 } = require('../db');
-const { response } = require("express");
+// const { response } = require("express");
 
 // POST /api/users/register
 usersRouter.post('/register', async (req, res, next) => {
@@ -95,31 +95,20 @@ usersRouter.post('/login', async (req, res, next) => {
 usersRouter.get('/me', async (req, res, next) => {
 
     try {
-        const prefix = 'Bearer ';
-        const auth = req.header('Authorization');
-        const token = auth.slice(prefix.length);
+        let user = req.user
 
-        // if (!jwt.verify(token, JWT_SECRET)) {
-        //     res.status(401)
-        //     next({
-        //       message: "invalid token, please log in"
-        //     })
-        // }
-
-        const { id, username } = jwt.verify(token, JWT_SECRET)
-
-        console.log("this is id", id, "this is username", username)
-
-        if (id && username) {
+        if (user) {
             res.send({
-                id, username
+                id: user.id,
+                username: user.username
             })
             next()
         } else {
-            next({
-                name: 'AuthorizationHeaderError',
-                message: `Authorization token must start with ${ prefix }`
-            });
+            res.status(401).send({
+                error: "NotAthorized",
+                message: "You must be logged in to perform this action",
+                name: "notLoggedIn"
+            })
         }
     } catch (error) {
         next(error)
