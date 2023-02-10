@@ -116,15 +116,19 @@ async function getPublicRoutinesByUser({ username }) {
   try{
     const user = await getUserByUsername(username)
     const routines = await getAllPublicRoutines()
-
+   
+    if (user) {
     const publicByUser = routines.filter(routine => routine.creatorId === user.id)
 
     return publicByUser
+    }
   } catch (error) {
     console.error(error)
     throw error
   }
 }
+
+
 
 async function getPublicRoutinesByActivity({ id }) {
   try{

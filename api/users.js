@@ -8,10 +8,13 @@ const bcrypt = require('bcrypt');
 
 const {
     createUser,
-    getUser,
-    getUserById,
     getUserByUsername,
+    getAllRoutinesByUser
 } = require('../db');
+const {
+    getPublicRoutinesByUser
+} = require ('../db/routines')
+
 // const { response } = require("express");
 
 // POST /api/users/register
@@ -117,6 +120,39 @@ usersRouter.get('/me', async (req, res, next) => {
 
 
 // GET /api/users/:username/routines
+// usersRouter.get('/:username/routines', async (req, res, next) => {
+
+//   try {
+//     const { username } = req.params
+//     console.log("this is username", username)
+//       const routines = await getPublicRoutinesByUser(username)
+//       console.log("this is routines", routines)
+//       res.send ({routines:routines})
+//   } catch (error) {
+//       next(error)
+//   }
+// })
+
+usersRouter.get('/:username/routines', async (req, res, next) => {
+    try {
+      const {username} = req.params;
+      const user = await getUserByUsername(username);
+      if(!user) {
+        next({
+          name: 'No User',
+          message: `Error looking up user ${username}`
+        });
+      } else if(req.user && user.id === req.user.id) {
+        const routines = await getAllRoutinesByUser({username: username});
+        res.send(routines);
+      } else {
+        const routines = await getPublicRoutinesByUser({username: username});
+        res.send(routines);
+      }
+    } catch (error) {
+      next(error)
+    }
+  })
 
 usersRouter.use((error, req, res, next) => {
     res.send(error)
