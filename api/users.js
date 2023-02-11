@@ -93,7 +93,7 @@ usersRouter.post('/login', async (req, res, next) => {
         next(error)
     }
 })
-
+ 
 // GET /api/users/me
 usersRouter.get('/me', async (req, res, next) => {
 
@@ -137,7 +137,7 @@ usersRouter.get('/:username/routines', async (req, res, next) => {
     try {
       const {username} = req.params;
       const user = await getUserByUsername(username);
-      if(!user) {
+      if(!user) { 
         next({
           name: 'No User',
           message: `Error looking up user ${username}`
