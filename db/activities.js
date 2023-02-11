@@ -61,14 +61,41 @@ async function getActivityByName(name) {
   }
 }
 
-async function attachActivitiesToRoutines(routines) {
-  // select and return an array of all activities
+async function attachActivitiesToRoutines(routine) {
+  // select and return an array of all activitiesh
+  const { rows: activities } = await client.query(`
+    SELECT "routineId", "activityId" AS id, routine_activities.id AS "routineActivityId", duration, count, name, description
+    FROM activities
+    JOIN routine_activities
+    ON routine_activities."activityId" = activities.id
+    WHERE routine_activities."routineId"=$1;
+  `, [routine.id])
+
+  routine.activities = activities
+
+  return routine
 }
 
+
 async function updateActivity({ id, ...fields }) {
+  const setString = Object.keys(fields).map((key, index) => `"${key}"=$${index + 1}`).join(",");
   // don't try to update the id
   // do update the name and description
   // return the updated activity
+  try{
+    if (setString.length > 0) {
+      const { rows } = await client.query(
+        `UPDATE activities 
+        SET ${setString}
+        WHERE id = ${id}
+        RETURNING *;
+      `, Object.values(fields));
+      return rows[0]; 
+    }
+  }catch (error){
+    console.log(error);
+  }
+
 }
 
 module.exports = {
