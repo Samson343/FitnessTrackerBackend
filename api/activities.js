@@ -15,12 +15,11 @@ activitiesRouter.get('/:activityId/routines', async (req, res, next) => {
         if (!activity) {
             next({
                 error: "NoActivityId",
-                message: "Activity 10000 not found",
+                message: `Activity ${activityId} not found`,
                 name: "NoId"
             })
         }
-        else if (activity) {
-
+        else {
             const routines = await getPublicRoutinesByActivity(activity)
 
             res.send(
@@ -81,7 +80,17 @@ activitiesRouter.patch('/:activityId', isAuthorized, async (req, res, next) => {
     try {
         const { activityId } = req.params
         const { name, description } = req.body
-        const updateFields = {id: activityId}
+        const updateFields = {}
+
+        if (activityId) {
+            updateFields.id = activityId
+        }
+        if (name) {
+            updateFields.name = name
+        }
+        if (description) {
+            updateFields.description = description
+        }
 
         const activity = await getActivityById(activityId)
 
@@ -92,27 +101,20 @@ activitiesRouter.patch('/:activityId', isAuthorized, async (req, res, next) => {
                 name: "ActDoesNotExistError"
             })
         }
-        if (await getActivityByName(name)) {
+        else if (await getActivityByName(name)) {
             next ({
                 error: "activity already exists",
                 message: `An activity with name ${name} already exists`,
                 name: 'ActAlreadyExistsError'
             })
         }
-        if (name) {
-            updateFields.name = name
-        }
-        if (description) {
-            updateFields.description = description
-        }
-        const updatedAct = await updateActivity(updateFields)
-        console.log("this is updated Act", updatedAct) 
+        else {
+            const updatedAct = await updateActivity(updateFields)
 
-        res.send({
-            name: updatedAct.name,
-            description: updatedAct.description
-        })
-        
+            res.send(
+                updatedAct
+            )
+        }
     } catch (error) {
         next(error)
     }
