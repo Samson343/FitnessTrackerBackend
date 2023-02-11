@@ -1,7 +1,8 @@
 const express = require('express');
 const activitiesRouter = express.Router();
 
-const { getAllActivities, getPublicRoutinesByActivity, createActivity, getActivityByName } = require('../db')
+const { getAllActivities, getPublicRoutinesByActivity, createActivity, getActivityByName, getActivityById, updateActivity } = require('../db');
+const { isAuthorized } = require('./utils');
 
 // GET /api/activities/:activityId/routines
 activitiesRouter.get('/:activityId/routines', async (req, res, next) => {
@@ -45,11 +46,9 @@ activitiesRouter.get('/', async (req, res, next) => {
 })
 
 // POST /api/activities
-activitiesRouter.post('/', async (req, res, next) => {
+activitiesRouter.post('/', isAuthorized, async (req, res, next) => {
     const { name, description } = req.body
 
-    // console.log('this is name', name)
-    // console.log('this is description', description)
     if (!name || !description) {
         next({
             name: "MissingInformation",
@@ -60,32 +59,64 @@ activitiesRouter.post('/', async (req, res, next) => {
     try {
         const _activity = await getActivityByName(name)
 
-        if (!req.user) {
-            res.status(401).send({
-                error: "NotAthorized",
-                message: "You must be logged in to perform this action",
-                name: "notLoggedIn"
-            })
-        }
-        else if (_activity) { 
+        if (_activity) {
             next({
                 error: "AlreadyExists",
                 message: `An activity with name ${name} already exists`,
                 name: "AlreadyExistsError"
             })
         }
-        else if (req.user) {
-            const activity = await createActivity({name: name, description: description})
-            console.log("this is activity", activity)
-              res.send({
-              name, description
-              })
-        }
+
+        await createActivity({ name: name, description: description })
+        res.send({
+            name, description
+        })
     } catch (error) {
         next(error)
     }
 })
 // PATCH /api/activities/:activityId
+activitiesRouter.patch('/:activityId', isAuthorized, async (req, res, next) => {
+
+    try {
+        const { activityId } = req.params
+        const { name, description } = req.body
+        const updateFields = {id: activityId}
+
+        const activity = await getActivityById(activityId)
+
+        if (!activity) {
+            next({
+                error: "activity does not exist",
+                message: `Activity ${activityId} not found`,
+                name: "ActDoesNotExistError"
+            })
+        }
+        if (await getActivityByName(name)) {
+            next ({
+                error: "activity already exists",
+                message: `An activity with name ${name} already exists`,
+                name: 'ActAlreadyExistsError'
+            })
+        }
+        if (name) {
+            updateFields.name = name
+        }
+        if (description) {
+            updateFields.description = description
+        }
+        const updatedAct = await updateActivity(updateFields)
+        console.log("this is updated Act", updatedAct) 
+
+        res.send({
+            name: updatedAct.name,
+            description: updatedAct.description
+        })
+        
+    } catch (error) {
+        next(error)
+    }
+})
 
 activitiesRouter.use((error, req, res, next) => {
     res.send(error)

@@ -12,6 +12,9 @@ const {
     getAllRoutinesByUser
 } = require('../db');
 const {
+    isAuthorized
+} = require('./utils')
+const {
     getPublicRoutinesByUser
 } = require ('../db/routines')
 
@@ -95,24 +98,13 @@ usersRouter.post('/login', async (req, res, next) => {
 })
  
 // GET /api/users/me
-usersRouter.get('/me', async (req, res, next) => {
-
+usersRouter.get('/me', isAuthorized, async (req, res, next) => {
     try {
         let user = req.user
-
-        if (user) {
-            res.send({
-                id: user.id,
-                username: user.username
-            })
-            next()
-        } else {
-            res.status(401).send({
-                error: "NotAthorized",
-                message: "You must be logged in to perform this action",
-                name: "notLoggedIn"
-            })
-        }
+        res.send({
+            id: user.id,
+            username: user.username
+        })
     } catch (error) {
         next(error)
     }
