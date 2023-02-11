@@ -10,12 +10,15 @@ const {
     getActivityById,
     updateActivity
 } = require(`../db`);
+// USED THE ERROR FILE TO HANDLE RETURNING THE  ACTUAL ERROR! =>
+
 const {  ActivityExistsError, ActivityNotFoundError } = require(`../errors`);
 
 
 // GET /api/activities/:activityId/routines
 router.get('/:activityId/routines', async (req, res, next) =>{
     const { activityId, } = req.params;
+    //const { routines } = req.params;
     try {
       const activityName = await getActivityById(activityId);
       const allPublicRoutineActivities = await getPublicRoutinesByActivity({
