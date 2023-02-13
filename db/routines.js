@@ -1,13 +1,11 @@
 const { attachActivitiesToRoutines } = require("./activities");
 const client = require("./client");
 const { addActivityToRoutine } = require("./routine_activities");
-
 const { getUserByUsername } = require("./users")
 
 async function createRoutine({ creatorId, isPublic, name, goal }) {
 
   try{
-
     const { rows: [routine] } = await client.query (`
       INSERT INTO routines( "creatorId", "isPublic", name, goal)
       VALUES($1, $2, $3, $4)
@@ -55,15 +53,15 @@ async function getRoutinesWithoutActivities() {
 }
 
 async function getAllRoutines() {
-  try{
 
+  try{
     const { rows: routines } = await client.query (`
       SELECT users.username AS "creatorName", routines.*
       FROM routines
       JOIN users ON users.id = routines."creatorId";
       `)
 
-      const withActivities = await Promise.all(routines.map(attachActivitiesToRoutines))
+    const withActivities = await Promise.all(routines.map(attachActivitiesToRoutines))
    
     return withActivities
   } catch (error) {
@@ -129,13 +127,10 @@ async function getPublicRoutinesByUser({ username }) {
 }
 
 
-
 async function getPublicRoutinesByActivity({ id }) {
   try{
     const allRoutines = await getAllPublicRoutines()
-   
     const withActivities = allRoutines.filter(routine => { return routine.activities.length })
-
     const result = []
 
     withActivities.map (routine => {
@@ -154,12 +149,12 @@ async function getPublicRoutinesByActivity({ id }) {
 }
 
 async function updateRoutine({id, ...fields }) {
-  console.log("this is id", id, "this is fields", fields)
   try{
 
     const setString = Object.keys(fields).map((key, index) => {
       return `"${ key }"=$${ index + 1 }`
     }).join(', ')
+    console.log(setString)
 
     if (setString.length) {
       const { rows: [routine] } = await client.query(`

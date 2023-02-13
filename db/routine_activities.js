@@ -70,7 +70,6 @@ async function updateRoutineActivity({ id, ...fields }) {
       return routine_act
     }
 
-
   } catch (error) {
     console.error(error)
     throw error
