@@ -45,7 +45,7 @@ describe("DB Routine Activities", () => {
   });
 
   describe("addActivityToRoutine({ routineId, activityId, count, duration })", () => {
-    xit("creates a new routine_activity, and return it", async () => {
+    xit("creates a new routine_activity, and return xit", async () => {
       const routineActivity = await addActivityToRoutine(routineActivityData);
 
       expect(routineActivity.routineId).toBe(routineActivityData.routineId);
@@ -70,7 +70,7 @@ describe("DB Routine Activities", () => {
       const fakeUser = await createFakeUser("Timmy");
       const fakeActivity = await createFakeActivity(
         "Fortnite",
-        "I know it's not exercise"
+        "I know xit's not exercise"
       );
       const fakeRoutine = await createFakePublicRoutine(
         fakeUser.id,

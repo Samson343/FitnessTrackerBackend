@@ -57,7 +57,7 @@ describe("/api/routine_activities", () => {
       expect(response.body).toMatchObject(updatedRoutineActivityData);
     });
 
-    xit("should return an error if the owner of the routine isn't the one trying to edit it", async () => {
+    xit("should return an error if the owner of the routine isn't the one trying to edit xit", async () => {
       const { fakeUser } = await createFakeUserWithToken("Lauren");
 
       const fakeRoutine = await createFakePublicRoutine(
@@ -134,7 +134,7 @@ describe("/api/routine_activities", () => {
       );
       const fakeActivity = await createFakeActivity(
         "Football Kicking",
-        "Make sure you pull it away quick"
+        "Make sure you pull xit away quick"
       );
       const fakeRoutineActivity = await createFakeRoutineActivity(
         fakeRoutine.id,

@@ -121,7 +121,7 @@ describe("DB Users", () => {
       expect(queriedUser.password).not.toBe(fakeUserData.password);
     });
 
-    xit("EXTRA CREDIT: Hashes the password (salted 10 times) before storing it to the database", async () => {
+    xit("EXTRA CREDIT: Hashes the password (salted 10 times) before storing xit to the database", async () => {
       const fakeUserData = {
         username: "Nicky",
         password: faker.internet.password(),

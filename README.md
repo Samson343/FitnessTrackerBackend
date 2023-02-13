@@ -1,7 +1,9 @@
 # fitnesstrackr
 ## test
 
-an API for our new fitness empire, FitnessTrac.kr, using node, express, and postgresql
+an API for our new fitness empire, FitnessTrac.kr, using node, express, and postgresql something
+
+Test for Sam's branch
 
 ## Getting Started
 
